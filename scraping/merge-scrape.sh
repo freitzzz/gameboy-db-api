@@ -15,7 +15,7 @@ jq '[.[] | .data.games[] | {
   release_year: (if .release_date then (.release_date | split("-")[0] | tonumber) else null end),
   adult: .adult,
   genres: [.genres[].name],
-  platforms: [.platforms[] | select(.name | startswith("Game Boy")) | .name],
+  platforms: [.platforms[] | select(.name | startswith("Game Boy")) | (.name | split(" ") | map(.[0:1]) | join(""))],
   developers: [.companies[] | select(.title_id == 2) | .name],
   publishers: [.companies[] | select(.title_id == 1) | .name],
   public_rating: (if .moby_score then (.moby_score * 10 | ceil) else null end),
