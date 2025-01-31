@@ -7,15 +7,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-type database struct {
-	*sql.DB
-}
-
-func Open(filepath string) (*database, error) {
+func Open(filepath string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", fmt.Sprintf("file:%s", filepath))
-	if err != nil {
-		return nil, err
-	}
-
-	return &database{DB: db}, err
+	return db, err
 }

@@ -1,6 +1,8 @@
 package database
 
-func (db *database) Tables() ([]string, error) {
+import "database/sql"
+
+func Tables(db *sql.DB) ([]string, error) {
 	cursor, err := db.Query("SELECT name FROM sqlite_master WHERE type='table';")
 	if err != nil {
 		return nil, err
