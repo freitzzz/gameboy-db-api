@@ -1,0 +1,5 @@
+*.sqlite
+*.sqlite-journal
+moby-games/
+scraping/*.json
+scraping/*.lst
