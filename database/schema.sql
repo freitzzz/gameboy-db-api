@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "Genre" (
 
 CREATE TABLE IF NOT EXISTS "Platform" (
     "platid" INTEGER PRIMARY KEY,
-    "acronym" INTEGER REFERENCES "PlatformAcronym" ("id")  NOT NULL UNIQUE
+    "acronym" VARCHAR(3) CHECK ( "acronym" in ("GB", "GBC", "GBA") ) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS "Publisher" (
@@ -27,10 +27,10 @@ CREATE TABLE IF NOT EXISTS "Developer" (
 );
 
 CREATE TABLE IF NOT EXISTS "Source" (
-    "srcid" INTEGER PRIMARY KEY,
+    "name" INTEGER(1) REFERENCES "SourceName" ("id")  NOT NULL,
     "gameid" INTEGER REFERENCES "Game" ("gameid") NOT NULL,
     "url" VARCHAR NOT NULL,
-    "name" INTEGER REFERENCES "SourceName" ("id")  NOT NULL
+    PRIMARY KEY ("name", "gameid")
 );
 
 CREATE TABLE IF NOT EXISTS "Asset" (
@@ -44,8 +44,9 @@ CREATE TABLE IF NOT EXISTS "Asset" (
 CREATE TABLE IF NOT EXISTS "Game" (
     "gameid" INTEGER PRIMARY KEY,
     "name" VARCHAR(128) NOT NULL,
-    "description" VARCHAR NOT NULL,
-    "release_year" INTEGER CHECK ( "release_year" >= 1984 ) NOT NULL,
+    "description" VARCHAR NULL,
+    -- TODO: Should include a check for year >= 1984! Currently disabled because the scraped data references the first origin of the game, for any platform.
+    "release_year" INTEGER NOT NULL,
     "esrb_rating" INTEGER REFERENCES "ESRB" ("id")  NOT NULL,
     "trivia" VARCHAR NULL,
     "promo" VARCHAR NULL,
@@ -81,13 +82,8 @@ CREATE TABLE IF NOT EXISTS "GameDeveloper" (
     PRIMARY KEY ("devid", "gameid")
 );
 
+
 -- Support tables
-
-
-CREATE TABLE IF NOT EXISTS "PlatformAcronym" (
-    "id" INTEGER(1) PRIMARY KEY CHECK ( "id" in (0, 1, 2) ) NOT NULL,
-    "value" VARCHAR(3) CHECK ( "value" in ("GB", "GBC", "GBA") ) NOT NULL UNIQUE
-) WITHOUT ROWID;
 
 CREATE TABLE IF NOT EXISTS "SourceName" (
     "id" INTEGER(1) PRIMARY KEY CHECK ( "id" in (0) ) NOT NULL,
