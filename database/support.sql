@@ -1,0 +1,24 @@
+-- DML for the database support tables.
+-- All instructions have been written to target SQLite engine.
+-- --
+
+-- Source names
+
+INSERT INTO "SourceName" VALUES (0, "MOBYGAMES");
+
+-- Asset types
+
+INSERT INTO "AssetType" VALUES (0, "SCREENSHOT");
+INSERT INTO "AssetType" VALUES (1, "THUMBNAIL");
+INSERT INTO "AssetType" VALUES (2, "COVER");
+INSERT INTO "AssetType" VALUES (3, "GAMEPLAY");
+
+-- ESRB Rating
+
+INSERT INTO "ESRB" VALUES (0, "RATING_PENDING");
+INSERT INTO "ESRB" VALUES (1, "EARLY_CHILDHOOD");
+INSERT INTO "ESRB" VALUES (2, "EVERYONE");
+INSERT INTO "ESRB" VALUES (3, "EVERYONE_ABOVE_10");
+INSERT INTO "ESRB" VALUES (4, "TEEN");
+INSERT INTO "ESRB" VALUES (5, "MATURE");
+INSERT INTO "ESRB" VALUES (6, "ADULT");
