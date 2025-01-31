@@ -25,20 +25,20 @@ const data = JSON.parse(fs.readFileSync(JSON_FILE, 'utf-8'));
 const db = new Database(DB_FILE);
 
 const esrbEnum = {
-    'Rating Pending': 0,
-    'Early Childhood': 1,
-    'Everyone': 2,
-    'Kids to Adults': 2,
-    'Everyone 10+': 3,
-    'Teen': 4,
-    'Mature': 5,
-    'Adult': 6,
+    'Rating Pending': 1,
+    'Early Childhood': 2,
+    'Everyone': 3,
+    'Kids to Adults': 4,
+    'Everyone 10+': 5,
+    'Teen': 6,
+    'Mature': 7,
+    'Adult': 8,
 };
 
 const platformEnum = {
-    'GB': 0,
-    'GBC': 1,
-    'GBA': 2,
+    'GB': 1,
+    'GBC': 2,
+    'GBA': 3,
 }
 
 // Initialize schema
@@ -61,11 +61,15 @@ function populateEnumTables() {
     console.log("Enum tables populated successfully.");
 }
 
-// Helper function to fetch rowid for a value in a table
-function getRowId(table, column, value) {
-    const stmt = db.prepare(`SELECT rowid FROM ${table} WHERE ${column} = ? LIMIT 1`);
+function getId(table, idColumn, valueColumn, value) {
+    const stmt = db.prepare(`SELECT ${idColumn} FROM ${table} WHERE ${valueColumn} = ? LIMIT 1`);
     const result = stmt.get(value);
     return result ? Object.values(result)[0] : null;
+}
+
+// Helper function to fetch rowid for a value in a table
+function getRowId(table, column, value) {
+    return getId(table, 'rowid', column, value);
 }
 
 // Insert data using cursors
@@ -156,7 +160,10 @@ function populateData() {
             });
 
             game.platforms?.forEach(platform => {
-                const platformId = getRowId('Platform', 'acronym', platform);
+                const platformId = getId('Platform', 'platid', 'acronym', platform);
+                if (gameId == 3) {
+                    console.log(`inserting (${platformId}, ${gameId})`)
+                }
                 if (platformId) insertGamePlatformStmt.run(platformId, gameId);
             });
 
