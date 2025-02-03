@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/freitzzz/gameboy-db-api/internal/database"
+	"github.com/freitzzz/gameboy-db-api/internal/errors"
 	"github.com/freitzzz/gameboy-db-api/internal/model"
 )
 
@@ -20,11 +21,15 @@ func (r dbGamesRepository) Find(id int) (model.Game, error) {
 
 	cursor := r.QueryRow("SELECT * FROM GameDetails WHERE gameid = ?", id)
 	err := database.ScanTo(cursor, &result)
-	if err != nil {
-		return model.Game{}, err
+	if err == nil {
+		return result.Model(), nil
 	}
 
-	return result.Model(), nil
+	if err == sql.ErrNoRows {
+		err = errors.ErrRecordNotFound
+	}
+
+	return model.Game{}, err
 }
 
 func (r dbGamesRepository) Previews(opt model.QueryOptions) ([]model.GamePreview, error) {

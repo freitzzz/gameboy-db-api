@@ -3,6 +3,7 @@ package http
 import (
 	"strconv"
 
+	"github.com/freitzzz/gameboy-db-api/internal/errors"
 	"github.com/freitzzz/gameboy-db-api/internal/logging"
 	"github.com/labstack/echo/v4"
 )
@@ -54,6 +55,12 @@ func httpErrorHandler() func(err error, c echo.Context) {
 		}
 
 		logging.Error("handling error... %v", err)
+
+		if err == errors.ErrRecordNotFound {
+			c.Response().WriteHeader(404)
+			return
+		}
+
 		he, ok := err.(*echo.HTTPError)
 
 		// If all cast fail, serve fallback
