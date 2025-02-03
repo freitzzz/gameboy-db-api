@@ -7,7 +7,7 @@ import (
 )
 
 type gameRecord struct {
-	ID              *string
+	ID              *int
 	Name            *string
 	Description     *string
 	ReleaseYear     *int

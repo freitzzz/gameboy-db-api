@@ -1,7 +1,7 @@
 package model
 
 type Game struct {
-	ID          string      `json:"id"`
+	ID          int         `json:"id"`
 	Name        string      `json:"name"`
 	ReleaseYear int         `json:"releaseYear"`
 	ESRB        int         `json:"esrb"`
