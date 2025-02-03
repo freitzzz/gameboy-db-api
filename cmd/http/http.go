@@ -1,10 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/freitzzz/gameboy-db-api/internal/data"
 	"github.com/freitzzz/gameboy-db-api/internal/database"
+	"github.com/freitzzz/gameboy-db-api/internal/http"
+	"github.com/freitzzz/gameboy-db-api/internal/logging"
+	"github.com/freitzzz/gameboy-db-api/internal/service"
 )
 
 func main() {
@@ -13,10 +16,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tbls, err := db.Tables()
-	if err != nil {
-		log.Fatal(err)
-	}
+	r := data.NewDbGamesRepository(db)
+	s := service.NewGamesService(r)
 
-	fmt.Printf("tbls: %v\n", tbls)
+	logging.AddLogger(logging.NewConsoleLogger())
+
+	hs := http.New().
+		WithHostPort("localhost", "8080").
+		WithServiceContainer(http.ServiceContainer(s)).
+		Build()
+
+	defer hs.Close()
+	if err := hs.Start(); err != nil {
+		logging.Fatal("failed to start http server, %v", err)
+	}
 }

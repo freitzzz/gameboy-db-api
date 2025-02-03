@@ -9,18 +9,18 @@ const (
 	previewListingCount = 20
 )
 
-type gamesService struct {
+type GamesService struct {
 	repository        data.GamesRepository
 	cacheHighestRated []model.GamePreview
 	cacheLowestRated  []model.GamePreview
 	cacheGames        map[int]model.Game
 }
 
-func NewGamesService(repository data.GamesRepository) *gamesService {
-	return &gamesService{repository: repository, cacheGames: map[int]model.Game{}}
+func NewGamesService(repository data.GamesRepository) *GamesService {
+	return &GamesService{repository: repository, cacheGames: map[int]model.Game{}}
 }
 
-func (s *gamesService) Find(id int) (model.Game, error) {
+func (s *GamesService) Find(id int) (model.Game, error) {
 	if game, ok := s.cacheGames[id]; ok {
 		return game, nil
 	}
@@ -34,7 +34,7 @@ func (s *gamesService) Find(id int) (model.Game, error) {
 	return game, nil
 }
 
-func (s *gamesService) HighestRated() ([]model.GamePreview, error) {
+func (s *GamesService) HighestRated() ([]model.GamePreview, error) {
 	if s.cacheHighestRated != nil {
 		return s.cacheHighestRated, nil
 	}
@@ -48,7 +48,7 @@ func (s *gamesService) HighestRated() ([]model.GamePreview, error) {
 	return previews, nil
 }
 
-func (s *gamesService) LowestRated() ([]model.GamePreview, error) {
+func (s *GamesService) LowestRated() ([]model.GamePreview, error) {
 	if s.cacheLowestRated != nil {
 		return s.cacheLowestRated, nil
 	}
