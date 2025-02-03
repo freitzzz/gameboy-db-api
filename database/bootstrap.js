@@ -7,6 +7,7 @@ import { Database } from "bun:sqlite";
 // Paths to database files
 const DB_FILE = path.join(import.meta.dir, 'db.sqlite');
 const SCHEMA_FILE = path.join(import.meta.dir, 'schema.sql');
+const VIEWS_FILE = path.join(import.meta.dir, 'views.sql');
 const SUPPORT_DML_FILE = path.join(import.meta.dir, 'support.sql');
 const JSON_FILE = path.join(import.meta.dir, '../scraping/merge.json');
 
@@ -16,8 +17,9 @@ if (fs.existsSync(DB_FILE)) {
     console.log("Existing database deleted.");
 }
 
-// Read schema, support dml, and JSON data
+// Read schema, views, support dml, and JSON data
 const schemaDDL = fs.readFileSync(SCHEMA_FILE, 'utf-8');
+const viewsDDL = fs.readFileSync(VIEWS_FILE, 'utf-8');
 const enumDML = fs.readFileSync(SUPPORT_DML_FILE, 'utf-8');
 const data = JSON.parse(fs.readFileSync(JSON_FILE, 'utf-8'));
 
@@ -49,6 +51,16 @@ function initializeSchema() {
         });
     })();
     console.log("Schema initialized successfully.");
+}
+
+// Initialize views
+function initializeViews() {
+    db.transaction(() => {
+        viewsDDL.split(';').forEach(stmt => {
+            if (stmt.trim()) db.exec(stmt.trim());
+        });
+    })();
+    console.log("Views initialized successfully.");
 }
 
 // Populate enum tables using a cursor
@@ -141,11 +153,11 @@ function populateData() {
             const gameId = result.lastInsertRowid;
 
             // Insert associated assets for the game
-            if (game.thumbnail_url) insertAssetStmt.run(gameId, game.thumbnail_url, 1, null);
-            if (game.cover_url) insertAssetStmt.run(gameId, game.cover_url, 2, null);
-            if (game.gameplay_url) insertAssetStmt.run(gameId, game.gameplay_url, 3, null);
+            if (game.thumbnail_url) insertAssetStmt.run(gameId, game.thumbnail_url, 2, null);
+            if (game.cover_url) insertAssetStmt.run(gameId, game.cover_url, 3, null);
+            if (game.gameplay_url) insertAssetStmt.run(gameId, game.gameplay_url, 4, null);
             if (Array.isArray(game.screenshots)) {
-                game.screenshots.forEach(url => insertAssetStmt.run(gameId, url, 0, null));
+                game.screenshots.forEach(url => insertAssetStmt.run(gameId, url, 1, null));
             }
 
             // Insert source URL if available
@@ -161,9 +173,6 @@ function populateData() {
 
             game.platforms?.forEach(platform => {
                 const platformId = getId('Platform', 'platid', 'acronym', platform);
-                if (gameId == 3) {
-                    console.log(`inserting (${platformId}, ${gameId})`)
-                }
                 if (platformId) insertGamePlatformStmt.run(platformId, gameId);
             });
 
@@ -199,6 +208,7 @@ function populateData() {
 initializeSchema();
 populateEnumTables();
 populateData();
+initializeViews();
 
 // Close the database
 db.close();
