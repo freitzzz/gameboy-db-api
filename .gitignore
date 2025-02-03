@@ -3,3 +3,4 @@
 moby-games/
 scraping/*.json
 scraping/*.lst
+dist/

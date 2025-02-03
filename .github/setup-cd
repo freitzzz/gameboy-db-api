@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+###############################################################################
+# This is a script that configures a CD (Continuous Deployment) using GitHub  #
+# releases for private Linux/macOS hosts.                                     #
+###############################################################################
+
+# Save program arguments to later pass on binary.
+args="$@"
+
+# Save current user to later pass on launcher.
+user="$USER"
+
+# Common urls.
+new_issue_url="https://github.com/freitzzz/gameboy-db-api/issues/new"
+latest_release_url="https://api.github.com/repos/freitzzz/gameboy-db-api/releases/latest"
+jq_release_url="https://github.com/jqlang/jq/releases/download/jq-1.7.1"
+
+# Installation directory and program paths.
+install_dir="$HOME/.config/gameboy-db"
+bin_path="$install_dir/gameboy-db-http"
+jq_bin_path="$install_dir/jq"
+
+if [ ! -d "$install_dir" ]; then
+    mkdir -p "$install_dir"
+fi
+
+fatal() {
+    printf "$1\n"
+    exit 1
+}
+
+jq() {
+    "$jq_bin_path" "$@"
+}
+
+exec_bin() {
+    exec "$bin_path" "$args"
+}
+
+download() {
+    url="$1"
+    if [ -z "$url" ]; then
+        fatal "Failed to extract url, please raise an issue to alert maintainers about this bug.\n$new_issue_url"
+    fi
+    bin_name="$(echo ${url##*/} | cut -d '_' -f1 | cut -d '-' -f1)"
+
+    printf "Downloading $bin_name ...\n"
+    wget -O "$install_dir/$bin_name" "$url"
+    chmod +x "$install_dir/$bin_name"
+}
+
+# Query host OS and CPU architecture to precisely select binary to download.
+case "$(uname -s)" in
+Linux) os="linux" ;;
+Darwin) os="darwin" ;;
+*) fatal ""$(uname -s)" isn't supported right now, please raise an issue to get support on this OS.\n$new_issue_url" ;;
+esac
+
+case "$(uname -m)" in
+x86_64) arch="amd64" ;;
+i386) arch="386" ;;
+aarch64) arch="arm64" ;;
+arm64) arch="arm64" ;;
+armv7l) arch="arm" ;;
+*) fatal ""$(uname -m)" isn't supported right now, please raise an issue to get support on this architecture.\n$new_issue_url" ;;
+esac
+
+# Download jq if not available.
+if [ ! -f "$jq_bin_path" ]; then
+    download "${jq_release_url}/jq-${os}-${arch}"
+fi
+
+# Head latest release
+response=$(wget -qO- "$latest_release_url")
+if ! [[ $? == 0 ]]; then
+    fatal "Failed to head release, please raise an issue to alert maintainers about this bug.\n$new_issue_url"
+fi
+
+latest_release_version="$(echo $response | jq -r .tag_name)"
+if [ -z "$latest_release_version" ]; then
+    fatal "Failed to extract release version, please raise an issue to alert maintainers about this bug.\n$new_issue_url"
+fi
+
+# If local target binary version is different than the latest release version, download it again.
+if [ ! -f "$bin_path" ] || [ "$latest_release_version" != "$($bin_path -version)" ]; then
+    download "$(echo $response | jq -r '.assets[] | select(.name == "gameboy-db-http_'${os}'_'${arch}'") | .browser_download_url')"
+fi
+
+# Run the binary
+exec_bin

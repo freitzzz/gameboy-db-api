@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - .version
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build binaries
+        run: |
+          ./tools/build http gameboy-db
+
+      - name: Prepare Version Tag
+        id: version_tag
+        run: "echo version=$(cat .version) >> $GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ steps.version_tag.outputs.version }}
+          tag_name: ${{ steps.version_tag.outputs.version }}
+          files: dist/*
+          draft: false
+          prerelease: true
