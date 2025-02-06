@@ -17,3 +17,8 @@ func Version() string {
 func Release() bool {
 	return release == "true"
 }
+
+// Indicates if the program is running on verbose mode.
+func Verbose() bool {
+	return *verbose
+}
