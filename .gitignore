@@ -1,5 +1,6 @@
 *.sqlite
 *.sqlite-journal
+.env
 moby-games/
 scraping/*.json
 scraping/*.lst

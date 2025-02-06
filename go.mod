@@ -3,6 +3,7 @@ module github.com/freitzzz/gameboy-db-api
 go 1.23.1
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/labstack/gommon v0.4.2
 	modernc.org/sqlite v1.34.5
