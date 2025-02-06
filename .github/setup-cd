@@ -35,6 +35,11 @@ jq() {
 }
 
 exec_bin() {
+    pid="$(pidof $bin_path)"
+    if [ ! -z "$pid" ]; then
+        kill -Kill $pid
+    fi
+
     exec "$bin_path" "$args"
 }
 
@@ -43,11 +48,33 @@ download() {
     if [ -z "$url" ]; then
         fatal "Failed to extract url, please raise an issue to alert maintainers about this bug.\n$new_issue_url"
     fi
-    bin_name="$(echo ${url##*/} | cut -d '_' -f1 | cut -d '-' -f1)"
+
+    bin_name="$2"
+    if [ -z "$bin_name" ]; then
+        bin_name="$(basename $url)"
+    fi
 
     printf "Downloading $bin_name ...\n"
     wget -O "$install_dir/$bin_name" "$url"
+}
+
+download_exec() {
+    download "$@"
+
+    bin_name="$2"
+    if [ -z "$bin_name" ]; then
+        bin_name="$(basename $url)"
+    fi
     chmod +x "$install_dir/$bin_name"
+}
+
+schedule_cron() {
+    cron_job='30 * * * * bash <(wget -qO- https://raw.githubusercontent.com/freitzzz/gameboy-db-api/refs/heads/master/.github/setup-cd)'
+
+    ({
+        crontab -l
+        cat cronfile
+    } | awk '!x[$0]++' | crontab -) &>/dev/null
 }
 
 # Query host OS and CPU architecture to precisely select binary to download.
@@ -68,7 +95,7 @@ esac
 
 # Download jq if not available.
 if [ ! -f "$jq_bin_path" ]; then
-    download "${jq_release_url}/jq-${os}-${arch}"
+    download_exec "${jq_release_url}/jq-${os}-${arch}" jq
 fi
 
 # Head latest release
@@ -84,7 +111,8 @@ fi
 
 # If local target binary version is different than the latest release version, download it again.
 if [ ! -f "$bin_path" ] || [ "$latest_release_version" != "$($bin_path -version)" ]; then
-    download "$(echo $response | jq -r '.assets[] | select(.name == "gameboy-db-http_'${os}'_'${arch}'") | .browser_download_url')"
+    download_exec "$(echo $response | jq -r '.assets[] | select(.name == "gameboy-db-http_'${os}'_'${arch}'") | .browser_download_url')" $(basename $bin_path)
+    download "$(echo $response | jq -r '.assets[] | select(.name == "db.sqlite") | .browser_download_url')"
 fi
 
 # Run the binary

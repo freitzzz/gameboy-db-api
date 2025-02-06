@@ -13,7 +13,7 @@ dists=(
 
 root="$(dirname "$0")/.."
 version="$(cat $root/.version)"
-build_pkg="github.com/freitzzz/internal/build"
+build_pkg="github.com/freitzzz/gameboy-db-api/internal/build"
 
 target="$1"
 prefix="$2-"
