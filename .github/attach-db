@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Attaches the database pre
+
+root="$(dirname "$0")"
+
+REPO_OWNER="freitzzz"
+REPO_NAME="gameboy-db-api"
+FILE_PATH="${root}/../database/db.sqlite"
+GITHUB_TOKEN="<token>"
+
+# Get the latest pre-release ID
+UPLOAD_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases" |
+    jq -r '[.[] | select(.prerelease == true)] | first | .upload_url' |
+    sed 's/{?name,label}//')
+
+# Upload the file
+curl -s -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Content-Type: application/octet-stream" \
+    --data-binary @"$FILE_PATH" \
+    "$UPLOAD_URL?name=$(basename "$FILE_PATH")"
