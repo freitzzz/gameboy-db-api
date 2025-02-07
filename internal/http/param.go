@@ -1,12 +1,12 @@
 package http
 
-type listingFilter string
+type ratingFilter string
 
 const (
-	listingFilterHighestRated listingFilter = "highest-rated"
-	listingFilterLowestRated  listingFilter = "lowest-rated"
+	ratingFilterHighestRated ratingFilter = "high"
+	ratingFilterLowestRated  ratingFilter = "low"
 )
 
 const (
-	filterQueryParam = "filter"
+	ratingFilterQueryParam = "rating"
 )

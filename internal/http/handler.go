@@ -20,9 +20,9 @@ func registerHandlers(e *echo.Echo) {
 
 func previewsHandler(ectx echo.Context) error {
 	return withServiceContainer(ectx, func(sc serviceContainer) error {
-		f := listingFilter(ectx.QueryParam(filterQueryParam))
+		f := ratingFilter(ectx.QueryParam(ratingFilterQueryParam))
 
-		if f == listingFilterLowestRated {
+		if f == ratingFilterLowestRated {
 			return callAndReply(ectx, sc.Games.LowestRated)
 		}
 
