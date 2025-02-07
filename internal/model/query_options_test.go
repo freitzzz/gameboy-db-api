@@ -96,3 +96,29 @@ func TestQueryOrderHighestRating(t *testing.T) {
 		})
 	}
 }
+
+func TestQueryOptionsListOnly(t *testing.T) {
+	testCases := []struct {
+		desc   string
+		input  QueryOptions
+		output bool
+	}{
+		{
+			desc:   "returns true if name is empty",
+			input:  QueryOptions{Name: ""},
+			output: true,
+		},
+		{
+			desc:   "returns false if name is not empty",
+			input:  QueryOptions{Name: "n"},
+			output: false,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			if tC.input.ListOnly() != tC.output {
+				t.Errorf("expected %v, but got %v", tC.output, !tC.output)
+			}
+		})
+	}
+}

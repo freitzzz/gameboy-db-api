@@ -10,7 +10,13 @@ const (
 
 type QueryOptions struct {
 	Count int
+	Page  int
 	Order queryOrder
+	Name  string
+}
+
+func (o QueryOptions) ListOnly() bool {
+	return len(o.Name) == 0
 }
 
 func (o queryOrder) None() bool {

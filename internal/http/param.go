@@ -9,4 +9,6 @@ const (
 
 const (
 	ratingFilterQueryParam = "rating"
+	nameFilterQueryParam   = "name"
+	pageFilterQueryParam   = "page"
 )

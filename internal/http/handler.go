@@ -5,6 +5,7 @@ import (
 
 	"github.com/freitzzz/gameboy-db-api/internal/errors"
 	"github.com/freitzzz/gameboy-db-api/internal/logging"
+	"github.com/freitzzz/gameboy-db-api/internal/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,13 +21,27 @@ func registerHandlers(e *echo.Echo) {
 
 func previewsHandler(ectx echo.Context) error {
 	return withServiceContainer(ectx, func(sc serviceContainer) error {
-		f := ratingFilter(ectx.QueryParam(ratingFilterQueryParam))
+		r := ratingFilter(ectx.QueryParam(ratingFilterQueryParam))
+		n := ectx.QueryParam(nameFilterQueryParam)
+		pq := ectx.QueryParam(pageFilterQueryParam)
 
-		if f == ratingFilterLowestRated {
-			return callAndReply(ectx, sc.Games.LowestRated)
+		if len(n) == 0 {
+			if r == ratingFilterLowestRated {
+				return callAndReply(ectx, sc.Games.LowestRated)
+			}
+
+			return callAndReply(ectx, sc.Games.HighestRated)
 		}
 
-		return callAndReply(ectx, sc.Games.HighestRated)
+		p, err := strconv.ParseInt(pq, 10, 32)
+		if err != nil {
+			logging.Warning("failed to parse page(%s), defaulting to 1, %v", p, err)
+			p = 1
+		}
+
+		return callAndReply(ectx, func() ([]model.GamePreview, error) {
+			return sc.Games.Search(int(p), n)
+		})
 	})
 }
 

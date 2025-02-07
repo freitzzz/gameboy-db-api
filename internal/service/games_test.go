@@ -76,3 +76,38 @@ func TestFindResultIsCached(t *testing.T) {
 		t.Errorf("expected call results to be cached, got %v, %v", g1, g2)
 	}
 }
+
+func TestSearchResultsAreCached(t *testing.T) {
+	s := service.NewGamesService(randomResultsGamesRepository{})
+
+	testCases := []struct {
+		desc string
+		call func() ([]model.GamePreview, error)
+	}{
+		{
+			desc: "calling Search caches results on service",
+			call: func() ([]model.GamePreview, error) { return s.Search(1, "pokemon") },
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			r1, err := tC.call()
+			if err != nil {
+				t.Errorf("did not expect call to fail, %v", err)
+			}
+
+			r2, err := tC.call()
+			if err != nil {
+				t.Errorf("did not expect call to fail, %v", err)
+			}
+
+			eq := slices.EqualFunc(r1, r2, func(e1, e2 model.GamePreview) bool {
+				return e1.ID == e2.ID
+			})
+
+			if !eq {
+				t.Errorf("expected call results to be cached, got %v and %v", r1, r2)
+			}
+		})
+	}
+}
