@@ -6,7 +6,7 @@
 CREATE TABLE IF NOT EXISTS "GamePreview" AS
 SELECT 
     g.gameid,
-    g.name AS game_name,
+    g.name,
     genres.genres,
     platforms.platforms,
     a.url AS thumbnail_url,
