@@ -55,9 +55,10 @@ func (g gameRecord) Model() model.Game {
 		Cover:       assetColumns(g.Cover, g.CoverHash),
 		Screenshots: sliceAssetColumns(g.Screenshots, g.ScreenshotsHash),
 		Genres:      splitColumnValues(g.Genres),
-		Platforms:   splitColumnValues(g.Genres),
-		Developers:  splitColumnValues(g.Genres),
-		Publishers:  splitColumnValues(g.Genres),
+		Platforms:   splitColumnValues(g.Platforms),
+		Developers:  splitColumnValues(g.Developers),
+		Publishers:  splitColumnValues(g.Publishers),
+		Gameplay:    assetColumns(g.Gameplay, nil),
 	}
 }
 
